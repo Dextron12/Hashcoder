@@ -1,5 +1,6 @@
-import sqlite3, colorama, os, random, datetime
+import sqlite3, colorama, os, random
 from shutil import rmtree as rm
+from datetime import datetime
 
 colorama.init()
 
@@ -81,6 +82,7 @@ class Vault(object):
             for char in range(len(code)):
                 if char % keySize == 0:
                     # get prev chaars using the theritical known amount of char length
+                    pass
                 else:
                     # THOIS WILL HAPPEN IN GENERAL FOR THE LARGE CHAR STRINGS
                     pass
@@ -108,12 +110,12 @@ class Vault(object):
         while True:
             print(colorama.ansi.clear_screen())
             vaultName = input("Enter Vault Name: ")
-            os.mkdir(self.BASE_DIR + '//Vaults//%s' % (vaultName))
+            os.mkdir(self.BASE_DIR + '\\Vaults\\%s' % (vaultName))
             genEncrypt = input("Create Random Encryption Set (Y|N): ")
             if genEncrypt == 'Y' or 'y' or 'yes' or 'YES':
                 with open(self.BASE_DIR + '//Vaults//%s//keys.vault' % (vaultName), 'w') as f:
                     encryptionKey = self.generateKeys(1, 26)
-                    f.write(encryptionKey + "{~}" + str(datetime.now()))
+                    f.write(str(encryptionKey) + "{~}" + str(datetime.now()))
                 break
             else:
                 # USER DOESNT WANT VUALT ENTRIES ENCRYPTED
@@ -123,17 +125,18 @@ class Vault(object):
         return vaultName
 
     def load_vault(self, vaultName):
-        with open(self.BASE_DIR + '//Vaults//%s//keys.vault' % (vaultName), 'r') as f:
-            data = f.read()
-        if data != "No_Encrypt":
-            time = data.split("{~}")[1]
-            encryptionKey = data.split("{~}")[0]
-        else:
-            encryptionKey = {}
-            for char in vault.keys:
-                encryptionKey[char] = char
-                time = datetime.now()
-        return encryptionKey, time
+        if os.path.isdir(self.BASE_DIR + "//Vaults//%s//" % (vaultName)):
+            with open(self.BASE_DIR + '//Vaults//%s//keys.vault' % (vaultName), 'r') as f:
+                data = f.read()
+            if data != "No_Encrypt":
+                time = data.split("{~}")[1]
+                encryptionKey = data.split("{~}")[0]
+            else:
+                encryptionKey = {}
+                for char in vault.keys:
+                    encryptionKey[char] = char
+                    time = datetime.now()
+            return encryptionKey, time
 
     def delete_vault(self, vaultName):
         if self.BASE_DIR + "//Vaults" in vaultName:
@@ -156,10 +159,10 @@ class Vault(object):
                             f.write(msg)
                     else:
                         # MSG DOES NOT REQUIRE ANY ENCRYPTION | JUST DUMP IN PLAIN TEXT
-                        with open(self.BASE_DIR + "//Vaults//%s//%s" % (vaultName, datetime.now(), 'w') as f:
+                        with open(self.BASE_DIR + "//Vaults//%s//%s" % (vaultName, datetime.now()), 'w') as f:
                             f.write(msg)
 
-    def read_msg(self, vaultName, fileName)
+    #def read_msg(self, vaultName, fileName)
                     
 
                     
@@ -186,28 +189,33 @@ class Loader(object):
             print("5. Encrypt Message to Vault\n")
             print("6. Decrypt Message from Vault\n")
             controller = input("Select An Option: ")
-            if controller == 1:
+            if controller == "1":
                 vaultName = vault.new_vault() 
                 encryptionKey, time = vault.load_vault()
-            elif controller == 2:
-                encryptionKey, time = vault.load_vault()
-            elif controller == 3:
+            elif controller == '2':
+                print(colorama.ansi.clear_screen())
+                vaultName = input("Vault Name: ")
+                encryptionKey, time = vault.load_vault(vaultName)
+            elif controller == '3':
                 pass # DO SAVE VAULT FUNCTION
-            elif controller == 4:
+            elif controller == '4':
                 vault.delete_vault()
-            elif controller == 5:
+            elif controller == '5':
                 if vaultName != None and encryptionKey != None:
                     while True:
                         fileControl = input("Load Message from file (Y|N): ")
                         if fileControl == "y" or "yes" or "YES" or "Y":
                             fileHeader = input("File Name: ")
-                            with open(fileHeader, 'r') as f:
-                                fileHeader = f.read()
-                            vault.new_msg(vaultName, encryptionKey, fileHeader)
+                            try:
+                                with open(fileHeader, 'r') as f:
+                                    fileHeader = f.read()
+                                vault.new_msg(vaultName, encryptionKey, fileHeader)
+                            except:
+                                print("Coulnt load encryption file")
                         else:
-                            vault.new_msg(vaultName, {})
+                            vault.new_msg(vaultName, encryptionKey)
 
-            elif controller == 6:
+            #elif controller == 6:
 
 loader = Loader()
 vault = Vault()
